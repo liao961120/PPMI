@@ -118,5 +118,3 @@ np.save(f"svd_ppmi_embeddings_{EMBEDDING_DIM}dim.npy", embeddings)
 
 # Signal process done
 beep(s)
-print(f"Finished in {(time() - s)/60} mins")
-

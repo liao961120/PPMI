@@ -19,6 +19,10 @@ def beep(start_time=None):
     else:
         print('\007')
 
-    if isinstance(start_time, float):
+    if start_time is not None:
         print(f"Finished in {(time() - start_time)/60:.4} mins")
 
+#%%
+s = time()
+
+beep(s)

@@ -1,5 +1,5 @@
 RAW_CORP = 'asbc5_plain_text.txt' #'asbc_lite.txt'
-WINDOW = 3  # Left & right context window size
+WINDOW = 3  # left & right context window size
 EMBEDDING_DIM = 300
 
 import math
@@ -19,7 +19,10 @@ with open(RAW_CORP) as f:
 # Index corpus
 vocab = set(corp)
 wi = {tk:i for i, tk in enumerate(vocab)}
-iw = {i:tk for tk, i in wi.items()}
+
+# Save vocabulary
+with open("svd_ppmi_embeddings_vocab.pkl", "wb") as f:
+    pickle.dump(wi, f)
 
 tk_num = len(corp)  # for tracking progress
 vocab_size = len(vocab)
@@ -85,8 +88,19 @@ ppmi_matrix = sparse.csr_matrix((data, (row, col)), shape=(vocab_size, vocab_siz
 ppmi_matrix.eliminate_zeros()
 
 
+#----------------- Release memory --------------------#
+del vocab
+del corp
+del wi
+del D
+del context
+del target
+del row
+del col
+del data
+
 #----------------- Construct Embeddings -------------------#
-# SVD on PPMI Matrix
+# SVD on PPMI Matrix (memory hungry)
 u, s, vt = svds(ppmi_matrix, k = EMBEDDING_DIM)
 
 # Get embeddings with reduced dimension
@@ -99,10 +113,10 @@ embeddings = (embeddings.T / scalar_array).T
 
 
 #----------------- Save Embeddings Data --------------------#
-with open("svd_ppmi_embeddings_vocab.pkl", "wb") as f:
-    pickle.dump(wi, f)
 np.save(f"svd_ppmi_embeddings_{EMBEDDING_DIM}dim.npy", embeddings)
 
 
 # Signal process done
 beep(s)
+print(f"Finished in {(time() - s)/60} mins")
+

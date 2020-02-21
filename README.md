@@ -7,7 +7,7 @@ Set the parameters in `main.py`:
 ```python
 RAW_CORP = 'path/to/corpus'  # txt with tokens separated by spaces
 WINDOW = 3                   # left & right context window size
-EMBEDDING_DIM = 300          # the dimension of output embeddings
+EMBEDDING_DIM = 300          # the dimension of output embeddings (watch for memory limits)
 ```
 
 Then run:

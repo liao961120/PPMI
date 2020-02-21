@@ -1,0 +1,6 @@
+__pycache__
+
+asbc*.txt
+test.py
+*.npy
+*.pkl

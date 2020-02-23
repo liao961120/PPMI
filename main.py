@@ -104,7 +104,8 @@ del data
 u, s, vt = svds(ppmi_matrix, k = EMBEDDING_DIM)
 
 # Get embeddings with reduced dimension
-embeddings = u * s
+#embeddings = u * s
+embeddings = u  # Eigenvalue weighting (see Levy et al. 2015)
 
 # Normalize embeddings to unit length
     # See example: np.array([[1,2], [3, 4] ,[5,6]]) / [2,1] (column-wise operation)

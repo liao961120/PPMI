@@ -24,6 +24,37 @@ class Embeddings():
         return data
 
 
+    def analogy(self, a1, a2, b1, e=0.001, top_n=3):
+        """Get analogy by cosine multiplication
+        
+        Parameters
+        ----------
+        a1 : Union[str, int]
+            A word
+        a2 : Union[str, int]
+            A word
+        b1 : Union[str, int]
+            A word
+        top_n : int, optional
+            Number of analogies to return, by default 3
+        """
+
+        # Get vocab
+        vocab = set(self.wi.keys())
+        for w in [a1, a2, b1]:
+            if w in vocab:
+                vocab.remove(w)
+
+        # Analogy cosine (see Levy et al. 2015)
+        def cosMul(b2):
+            return (self.cossim(b2, a1) * self.cossim(b2, b1)) / (self.cossim(b2, a1) + e)
+
+        similarities = sorted(( (cosMul(b2), b2) for b2 in vocab ), reverse=True)
+
+        return similarities[:top_n]
+
+
+
     def cossim(self, w1, w2):
         """Compute cosine similarity of two words.
         

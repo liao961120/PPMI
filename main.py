@@ -1,6 +1,7 @@
-RAW_CORP = 'asbc5_plain_text.txt' #'asbc_lite.txt'
+RAW_CORP = 'asbc5_plain_text.txt' #'asbc5_plain_text.txt' #'asbc_lite.txt'
+WORD_FQ_THRESHHOLD = 30
 WINDOW = 3  # left & right context window size
-EMBEDDING_DIM = 300
+EMBEDDING_DIM = 150
 
 import math
 import pickle
@@ -14,17 +15,24 @@ s = time()  # Record start time
 
 #-------------------- Preprocess raw corpus -----------------#
 with open(RAW_CORP) as f:
-    corp = f.read().split()
+    corp = f.read()
+#corp = [ [text.split()] for text in corp.split('\n') ]
+
+# Get word occurence stat
+vocab = set(corp)
+vocab_counts = {w:0 for i, w in enumerate(vocab)}
+for w in corp:
+    vocab_counts[w] += 1
+vocab = set( w for w, c in vocab_counts.items() if c > WORD_FQ_THRESHHOLD )
 
 # Index corpus
-vocab = set(corp)
 wi = {tk:i for i, tk in enumerate(vocab)}
+#iw ={v:k for k, v in wi.items()}
 
 # Save vocabulary
 with open("svd_ppmi_embeddings_vocab.pkl", "wb") as f:
     pickle.dump(wi, f)
 
-tk_num = len(corp)  # for tracking progress
 vocab_size = len(vocab)
 
 
@@ -39,8 +47,13 @@ for i, tgt_w in enumerate(corp):
     # Record cooccurences in context window
     cntx = [ w for w in corp[(i-WINDOW):i] + corp[(i+1):(i+WINDOW+1)] ]
     for cntx_w in cntx:
-        pair = (wi[tgt_w], wi[cntx_w])
         
+        # Filter out words with low fq
+        if (tgt_w not in vocab) or (cntx_w not in vocab):
+            continue
+
+        pair = (wi[tgt_w], wi[cntx_w])
+
         # Update coocurrence
         if pair in D.keys():
             D[pair] += 1
@@ -78,7 +91,7 @@ def pmi(tgt_w, cntx_w, ppmi=False):
 row = []
 col = []
 data = []
-for i, pair in enumerate(D.keys()):
+for pair in D.keys():
     row.append(pair[0])
     col.append(pair[1])
     data.append(pmi(*pair, ppmi=True))
@@ -101,10 +114,10 @@ del data
 
 #----------------- Construct Embeddings -------------------#
 # SVD on PPMI Matrix (memory hungry)
-u, s, vt = svds(ppmi_matrix, k = EMBEDDING_DIM)
+u, sigma, vt = svds(ppmi_matrix, k = EMBEDDING_DIM)
 
 # Get embeddings with reduced dimension
-#embeddings = u * s
+#embeddings = u * sigma
 embeddings = u  # Eigenvalue weighting (see Levy et al. 2015)
 
 # Normalize embeddings to unit length

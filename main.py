@@ -1,10 +1,12 @@
+#%%
 RAW_CORP = 'asbc5_plain_text.txt' #'asbc5_plain_text.txt' #'asbc_lite.txt'
-WORD_FQ_THRESHHOLD = 30
-WINDOW = 3  # left & right context window size
-EMBEDDING_DIM = 150
+WORD_FQ_THRESHHOLD = 20
+WINDOW = 4  # left & right context window size
+EMBEDDING_DIM = 50
 
 import math
 import pickle
+import tqdm
 import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import svds
@@ -16,8 +18,9 @@ s = time()  # Record start time
 #-------------------- Preprocess raw corpus -----------------#
 with open(RAW_CORP) as f:
     corp = f.read()
-#corp = [ [text.split()] for text in corp.split('\n') ]
+corp = [ tk for text in corp.split('\n') for tk in text.split('\u3000') ]
 
+#%%
 # Get word occurence stat
 vocab = set(corp)
 vocab_counts = {w:0 for i, w in enumerate(vocab)}
@@ -42,7 +45,7 @@ context = {i:0 for i, tk in enumerate(vocab)}
 target = {i:0 for i, tk in enumerate(vocab)}
 
 # Count co-occurrences of all (target, context) pairs
-for i, tgt_w in enumerate(corp):
+for i, tgt_w in tqdm.tqdm(enumerate(corp)):
     
     # Record cooccurences in context window
     cntx = [ w for w in corp[(i-WINDOW):i] + corp[(i+1):(i+WINDOW+1)] ]

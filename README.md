@@ -5,9 +5,9 @@
 Set the parameters in `main.py`:
 
 ```python
-RAW_CORP = 'path/to/corpus'  # txt with tokens separated by spaces
+RAW_CORP = 'path/to/corpus'  # txt with tokens separated by spaces (`\u3000`)
 WINDOW = 3                   # left & right context window size
-EMBEDDING_DIM = 300          # the dimension of output embeddings (watch for memory limits)
+EMBEDDING_DIM = 300          # the dimension of output embeddings (beware of memory limits)
 ```
 
 Then run:
@@ -23,13 +23,17 @@ This should generate two files: `svd_ppmi_embeddings_vocab.pkl` and `svd_ppmi_em
 - `svd_ppmi_embeddings_{EMBEDDING_DIM}dim.npy`
     - A 2d numpy array with each row vector (length equals `EMBEDDING_DIM`) corresponding to a word embedding.
 
+You can also export the trained embeddings as plain text files. See `export_plaintext.py` for details.
+
 
 ## Usage
+
+You can then load the trained embeddings using functions in `svd_embeddings.py`:
 
 ```python
 # See svd_embeddings.py
 from svd_embeddings import Embeddings
-embed = Embeddings()
+embed = Embeddings(embed_dim=50)
 
 >>> embed.cossim("哥哥", "姊姊")
 0.9718541428549548
